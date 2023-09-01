@@ -465,9 +465,120 @@
   - The `requester` must be `authenticated in AWS`
 - Event Notifications (SNS, SQS, Lambda)
   - Created, Removed, Restored, Replication
-  - IAM Permissions
+  - Options
     - `All the event` go to `Amazon EventBridge` before go to the next step
       - Advanced filtering options with JSON rules
       - Multiple destination
       - EventBridge can - Archive, Replay Events, Reliable delivery
-    - Attach to `SNS topic` or `SQS queue` or `Lambda function`
+    - `SNS topic` or `SQS queue` or `Lambda function`
+  - IAM Permissions
+- Performance
+  - `100-200 ms` to get the first byte of object
+  - `3500 PUT/COPY/POST/DELETE` per sec per prefix
+  - `5500 GET/HEAD` per sec per prefix
+  - `Object path = prefix`
+    - bucket/folder1/sub1/file -> /folder1/sub1/
+  - Multi-Part upload
+    - recommended for >100MB, a must for `>5GB`
+  - Transfer Acceleration
+    - Speed up uploads by transfering to `AWS edge location` then forward to S3 bucket in the target region
+    - Compatible with Multi-Part upload
+  - Byte-Range Fetches
+    - Speed up download by `Parallelize GETs`
+    - Better resilience in case of failures
+- Select & Glacier Select
+  - `Filter` data using `server-side SQL filtering`
+- Batch Operations
+  - Modify metadata & properties
+  - Copy
+  - Encrypt/Decrypt
+  - Modify ACLs, tags
+  - Restore from Glacier
+  - Invoke Lambda for custom actions
+  - Usecases - [generate reports, notification, track progress]
+- Security
+  - Encryption
+    - Server-Side (SSE)
+      - S3-Managed Keys (SSE-S3) **Default**
+        - AES256
+        - "x-amz-server-side-encryption": "AES256"
+        - Encrypt before store
+      - KMS Keys Stored (SSE-KMS)
+        - Audit the key using `CloudTrail`
+        - "x-amz-server-side-encryption": "aws:kms"
+        - Limitations
+          - Has `additional API calls to KMS` (GenKey, Encrypt, Decrypt)
+          - KMS has `quota` per sec (5500, 10000, 30000 req/s based on region)
+      - Customer-Provided Keys (SSE-C)
+        - Pass the `key` in every request `HEADER`
+        - AWS never store the key
+    - Client-Side Encryption
+      - Must use HTTPS
+    - Encryption in Transit (SSL/TLS)
+      - Force by Bucket Policy
+
+        ```json
+        {
+          "Condition": {
+            "Bool": {
+              "aws:SecureTransport": "true"
+            }
+          }
+        }
+        ```
+
+      - Set default encryption in Bucket Policies
+
+        ```json
+        {
+          "Condition": {
+            "StringNotEqul": {
+              "s3:x-amz-server-side-encryption": "aws:kms"
+            }
+          }
+        }
+        ```
+
+  - CORS (cross-origin resource sharing)
+    - Origin = scheme (protocol) + host (domain) + port
+  - MFA Delete (optional)
+    - Versioning must be enable
+    - Only root account can enable/disable MFA delete
+    - Required to
+      - Permanently delete
+      - Suspend versioning
+    - Not required
+      - Enable versioning
+      - List deleted versions
+  - Access Logs
+    - Log into another bucket (do not use the same bucket: Loop)
+    - Can analyze data using data analysis tools
+    - Must be the same AWS region
+  - Pre-Signed URLs - Tempolary URL (1-720 mins)
+  - Glacier `Vault Lock`
+    - Adopt a WORM (Write Once Read Many)
+    - Create a Vault Lock Policy - Lock the policy for future edit
+    - Useful for compliance and data retention
+  - S3 Object Lock (must enable versioning)
+    - Object-wise operation
+    - Retention modes
+      - Compliance 
+        - Can't be overwritten or deleted by any user, root too
+        - Can't be changed, retention period can't be shortened
+      - Governance
+        - Most user can't overwritten or deleted by any user
+        - Some user can have special permission to change retention or delete object
+      - Rentention Period - protect for fixed period, can be extended
+      - Legal Hold - Protect forever
+        - Can be freely enabled/disabled
+- Access Point
+  - Bucket Policy to `prefix`
+    - /finace prefix has a policy
+    - /sales prefix has a policy
+  - A good way to manage `security/permission at scale`
+  - Has its own `DNS name`
+  - VPC origin access point
+    - Access only `within the VPC`
+  - Object Lambda access point
+    - Modify the object using Lambda before accessing
+    - Use cases - [XML to JSON, Resizing/watermarking, Redacting personal info]
