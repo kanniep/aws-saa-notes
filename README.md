@@ -463,3 +463,11 @@
   - For the data `download`
   - For `sharing` `large datasets` for other accounts
   - The `requester` must be `authenticated in AWS`
+- Event Notifications (SNS, SQS, Lambda)
+  - Created, Removed, Restored, Replication
+  - IAM Permissions
+    - `All the event` go to `Amazon EventBridge` before go to the next step
+      - Advanced filtering options with JSON rules
+      - Multiple destination
+      - EventBridge can - Archive, Replay Events, Reliable delivery
+    - Attach to `SNS topic` or `SQS queue` or `Lambda function`
