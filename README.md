@@ -582,3 +582,48 @@
   - Object Lambda access point
     - Modify the object using Lambda before accessing
     - Use cases - [XML to JSON, Resizing/watermarking, Redacting personal info]
+
+## CloudFront
+
+- Is a CDN (content delivery network)
+- Read performance, cache at the edge
+- `216 point` of presence globally
+- DDoS protection (AWS Shield)
+- Great for `static content`
+- `Served from the edge` location `unlike Global Accelerator`
+- Has TTL (maybe a day)
+- Origins
+  - S3 bucket
+    - Enhanced security using `OAC` (Origin Access Control)
+    - Can be used to upload to S3 too (`ingress`)
+  - Custom (HTTP)
+    - ALB
+    - EC2
+    - S3 website
+    - Any HTTP backend
+- Geo Restriction
+  - Allowlist of contries
+  - Blocklist of contries
+  - The "country" is determined using a `3 party Geo-IP DB`
+  - Usecase - Copy right law
+- Price Classes
+  - Cost of data out per edge location varies
+  - The higher data out, the lower the cost gets
+  - Classes
+    - `All regions` - best performance
+    - `200` - most region, excludes the most expensive regions
+    - `100` - only the least expensive regions
+- Cache Invalidations
+  - `Force cache refresh` before TTL expired
+
+## Global Accelerator
+
+- Uses `"Anycast IP"`
+  - Anycast IP - multiple servers share the same IP, client connect to the closes server
+- Route client `through private AWS network` **via** `closest edge location`
+- Works with Elastic IP, EC2, ALB, NLB, public or private
+- Consistent Performance
+- Perform Health Checks on your application - failover
+- DDoS protection (AWS Shield)
+- Can served `Non-HTTP` (TCP, UDP, MQTT) unlike CloudFront
+- Or for `HTTP` that `required static IP`
