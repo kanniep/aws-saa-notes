@@ -627,3 +627,48 @@
 - DDoS protection (AWS Shield)
 - Can served `Non-HTTP` (TCP, UDP, MQTT) unlike CloudFront
 - Or for `HTTP` that `required static IP`
+
+## Snow Family
+
+- Secure, `portable devices`
+- To `collect/process data` at the edge
+- And `migrate data into/out` of AWS
+- Uses `AWS OpsHub` install on your computer to interact with them
+- Usecases
+  - Data migration (`Physical` route)
+    - Save network bandwidth (save cost)
+    - `Pay per` data transfer `job`
+  - Edge computing
+    - No internet / no computing power
+    - Usecases
+      - Preprocess data
+      - ML at the edge
+      - Transcode media
+- **Snowcone** device - 2CPUs, 4GB, `Wifi, USB-C power`
+  - Small, rugged - space constrained env
+  - Your own battery/cable
+  - Types
+    - Snowcone - 8TB of HDD
+    - Snowcone SSD - 14TB of SSD
+  - Ship to AWS `offline` **or** connect to internet and use `AWS DataSync`
+- **Snowball Edge** device
+  - AWS ship the device to client
+  - Client load data to the device
+  - Client ship the device to AWS
+  - AWS import data to S3, etc.
+  - All can run EC2, Lambda (using IoT Greengrass)
+  - 1-3 years discount price
+  - Types
+    - Edge Storage Optimized
+      - 40 vCPUs, 80GB
+      - 80TB
+    - Edge Compute Optimized
+      - 104 vCPUs, 416GB
+      - 42TB of HDD or 28TB NVMe
+      - Clustering, up to 16 nodes
+- **Snowmobile**
+  - `A truck`
+  - If need to transfer Exabytes of data (1,000,000TB)
+  - Each truck can carry `100PB`
+  - Temperature controlled, GPS, 24/7 CCTV
+  - More than 10PB, better than Snowball
