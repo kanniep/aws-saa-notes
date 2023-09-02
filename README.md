@@ -1,6 +1,8 @@
 # AWS SAA Cerificate Prep
 
-## IAM
+## Security
+
+### IAM
 
 - users
   - for actual user
@@ -13,110 +15,42 @@
   - Access Advisor
   - Credential report
 
-## EC2
+## Storage Services
 
-- Storage
-  - Network-attached: [EBS, EFS]
-  - Hardware: ECS Instance Store
-- Bootstrap
-  - EC2 User data script: run once at first start
-  - Run with the root user
+![storage-options](storage-options.png)
+
+### EBS (Elastic Block Store)
+
+- `one-to-one` to EC2 instance
+- Bound to a specific AZ
+- Free tier: `30GB` general purpose (ssd/disk) per month
+- It's a `network drive` - can be (de/at)tached (to/from) an EC2 instance
+- Snapshot it to move to another AZ
+- Can increase capasity over time
+- Snapshot
+  - Archive `<75%` - `24-72 hours` to restore
+  - Fast Snapshot Restore - `$$$`
+  - Can have `Recycle Bin` - retension `1 day - 1 year`
 - Types
-  - General Purpose
-  - Compute Optimized
-  - Media transcoding
-  - ML
-  - Gaming server
-  - Memory Optimized: [Database, Web cache, Real-time processing]
-  - Storage Optimized [Database, Redis, Distributed file systems]
-- Security Group
-  - Only contain allow rules
-  - Can be attached to multiple instances
-  - Bound to a region/VPC combination
-  - If traffic being blocked by Security Group rules: "time out"
-  - If there is an application error: "connection refuse"
-  - Can reference to other Security Groups
-- Purchasing Option
-  - On-Demand (Default)
-    - Billing
-      - Linux / Windows
-        - Per sec
-      - All other
-        - Per hour
-  - Reserved / Convertible Reserved (1-3 years)
-    - Long workloads
-    - 72% discount
-    - Payment Option: [NoUpfront, PartialUpfront, AllUpfront]
-  - Saving Plan  (1-3 years)
-    - Commit to an amount of usage in dollar
-    - `72%` discount
-    - Commit to like ($10/hour for 1-3 years)
-    - Usage beyond that will be billing at the default price
-    - Locked to specific instance type and region
-  - Spot
-    - Short workloads, cheap, can lose instances
-    - Up to `90%` discount
-    - Lose when your `(willing max price<spot price)`
-      - 2 minutes to stop or terminate
-    - Suited for workloads acceptable for failure
-      - [Batch jobs, Data analysis, Image processing, Distributed workloads, Flexible start/end time]
-    - *OLD*: spot block: 1-6 hours
-    - `One-time / Persistent`
-    - Spot Fleets = Spots + (optional) On-demand
-  - Dedicated Hosts (whole physical server)
-    - Compliant reason, your own software license
-  - Dedicated Instances (no other customers sharing your hardware)
-  - Capacity Reservations
-    - Reserve capacity in specific AZ
-    - No discount
-    - Make sure to have the instances
-- Placement Groups
-  - Cluster: Same rack, Same AZ (10 Gbps)
-  - Spread: Multi-AZ
-    - limit 7 instances/AZ/group
-  - Partition: Multi-rack in AZ, Multi-AZ
-    - [HDFS, HBase, Cassandra, Kafka]
-- ENI (Elastic Network Interfaces)
-  - Virtual network card
-  - 1 primary IPv4, muti-secondary IPv4, mult-security-group, 1 MAC address
-  - Bound to a specific AZ
-  - An EC2 can have muti-ENI
-- Hibernate: RAM (`<150GB`) state is preserved in EBS
-  - Stop - EBS is kept (takes time when start)
-  - Terminate - EBS destroy
-  - Hibernate <60 days
-- EBS (Elastic Block Store)
-  - `one-to-one` to EC2 instance
-  - Bound to a specific AZ
-  - Free tier: `30GB` general purpose (ssd/disk) per month
-  - It's a `network drive` - can be (de/at)tached (to/from) an EC2 instance
-  - Snapshot it to move to another AZ
-  - Can increase capasity over time
-  - Snapshot
-    - Archive `<75%` - `24-72 hours` to restore
-    - Fast Snapshot Restore - `$$$`
-    - Can have `Recycle Bin` - retension `1 day - 1 year`
-  - Types
-    - gp2/gp3 (SSD): General purpose
-    - io1/io2 (SSD): High performance
-      - Multi-Attach: can be attached to `multiple EC2 at the same time`
-      - Bound to a `specific AZ`
-      - Up to `16 EC2`
-    - st1     (HDD): Low cost, frequently accessed
-    - sc1     (HDD): Low cost, less frequently accessed
-  - Only gp2/gp3/io1/io2 can be used as `boot volumes`
-  - Encryption: All data flight in/out are also encrypted
-  - `Root volume will be deleted by default` if the attached EC2 terminated
-- EC2 Instance Storage (ephemeral)
-  - `Direct attached` (not network)
-  - Better I/O
-  - Loss if the instance stopped
-  - Backups and replication are your responsibility
-- AMI (Amazon Machine Image)
-  - Bound to a `specific region`
-  - Types: [Amazon, Custom, Marketplace]
+  - gp2/gp3 (SSD): General purpose
+  - io1/io2 (SSD): High performance
+    - Multi-Attach: can be attached to `multiple EC2 at the same time`
+    - Bound to a `specific AZ`
+    - Up to `16 EC2`
+  - st1     (HDD): Low cost, frequently accessed
+  - sc1     (HDD): Low cost, less frequently accessed
+- Only gp2/gp3/io1/io2 can be used as `boot volumes`
+- Encryption: All data flight in/out are also encrypted
+- `Root volume will be deleted by default` if the attached EC2 terminated
 
-## EFS (Elastic File System) `Expensive`
+### EC2 Instance Storage (ephemeral)
+
+- `Direct attached` (not network)
+- Better I/O
+- Loss if the instance stopped
+- Backups and replication are your responsibility
+
+### EFS (Elastic File System) `Expensive`
 
 - NFS `Multi-AZ`
 - Multi-Attach: can be attached to `multiple EC2 at the same time`
@@ -130,274 +64,7 @@
   - Storage Tiers: [Standard, Infrequent access (IA) (/w retention)]
   - Availability and durability: [Standard, OneZone (one AZ: `EFS One Zone-IA 90% cost saving`)]
 
-## ELB (Elastic Load Balancer)
-
-- Features
-  - Health check
-    - "/health" route return 200
-    - if `unhealthy` will be `terminated`
-  - Provide HTTPS
-  - Stickiness with cookies
-  - Separate public/private traffic
-- Can be integrated with: [EC2, ACM, CloudWatch, Route 53]
-- Types
-  - CLB (Classic) (`Deplecated`): HTTP, HTTPS, TCP
-    - Sticky Sessions (Session Affinity)
-  - ALB (layer 7): HTTPf, HTTPS, WebSocket
-    - Can route to `multiple path at the same time`
-      - .../user to micro service 1
-      - .../search to micro service 2
-    - Can route to `multiple query string parameter`
-      - .../?Platform=Mobile to micro service 1
-      - .../?Platform=Desktop to micro service 2
-    - Don't see the true IP of clients, can get port from (X-Forwareded-Port) and proto (X-Forwareded-Proto)
-    - Latency `~400ms`
-    - Sticky Sessions (Session Affinity)
-    - Cookie names are reserved by the ELB (AWSALB, AWSALBAPP, AWSALBTG).
-    - Server Name Indication (`SNI`) allows you to expose multiple HTTPS applications each with its own SSL certificate on the same listener
-  - NLB: TCP, TLS, UDP: layer 4
-    - Millions of requests per sec
-    - Latency `~100ms`
-    - `Not in free tier`
-    - `On static IP per AZ` and support for Elastic IP
-    - Sticky Sessions (Session Affinity)
-  - GWLB (Gateway): layer 3 (Network Layer): IP packets
-    - Examples: [Firewalls, Intrusion Detection, Payload manipulation, ...]
-- Cross-Zone Load Balancing 
-  - (`Enable by default`) for ALB, not for NLB/CLB
-  - With: Distribute evenly across all instances in all AZ
-  - Without: Distribute evenly across all AZ (depend on number of instances in the AZ)
-  - No charge for inter AZ data
-- Connection Draining (Deregistration Delay)
-  - Time to complete requests while the instance is de-registering or unhealthy
-  - Stop sending request to the de-refistered instance
-  - 1-3600 sec
-  - Can be disabled
-
-## ASG (Auto Scaling Group)
-
-- Scale out/in the match the load
-- Can set min/max number of instances running
-- Automatically register new instances to load balancer
-- Min/Desired/Max capacity
-- Scaling policy
-  - Scale based on CloudWatch alarms
-  - Types
-    - Target Tracking: average ASG CPU to stay ~40%
-    - Simple / Step: Cloudwatch alarm, then add 2 unit
-    - Scheduled Actions
-    - Predictive: continuously forecast load and schedule scaling ahead
-  - Good metrics
-    - CPUUtil (avg)
-    - RequestCountPerTarget
-    - Average Network in/out
-    - Any custom cloudwatch metric
-  - Scaling Cooldowns: 300 seconds
-    - After scaling, not launch or terminate additional instances
-
-## RDS (Relational Database Service)
-
-- Advantages
-  - OS Patching
-  - Backup and restore to specific timestamp
-  - Monitoring
-  - Read replicas for better read performance
-  - Multi AZ for Disaster Recovery (DR)
-  - Scaling
-  - `But cannot SSH`
-- Storage Auto Scaling
-  - Increase storage for you dynamically
-  - Can set `Max storage threshold`
-  - Useful for `unpredictable workloads`
-- Read Replicas
-  - `Up to 15`
-  - Within AZ, Cross AZ, Cross region
-  - Replication is Async (`Eventually consistent`)
-  - Replicas can be promoted to their own DB
-  - Network Cost: traffics in the `same region` are free
-  - `Can be set up as DR`
-- Multi AZ (DR)
-  - SYNC replication (replicate everything)
-  - One DNS name - failover
-  - Just for standby - not for scaling
-  - Automatic Steps from Single-AZ to Multi-AZ
-    - A snapshot taken
-    - A new DB restored from the snapshot in a new AZ
-    - Sync
-- RDS Custom: Manage OS and DB Customization
-  - `Oracle`, `Microsoft SQL Server`
-  - Configure settings, Install patches, Enable native features, SSH
-  - `De-activate Automation Mode` to do customization
-- Backups
-  - Automated
-    - `Daily` full backup
-    - Transaction `logs` every `5 minutes`
-    - `1-35` days retention
-  - Manual Snapshots
-    - `No limit` retention
-- Security
-  - Can be encrypted
-  - if master not encrypted replicas cannot be encrypted
-  - `TLS-ready` by default
-  - Instead of username/pw, you can also use `IAM roles`
-  - `Security Groups` can be applied
-  - `No SSH` - except RDS custom
-  - Audit logs can be add to CloudWatch
-- RDS Proxy - Load Balancer - Autoscaling
-  - Improve DB efficiency - Combine similar DB connection before sending to the actual RDS
-  - Reduce failover time by `66%`
-  - `Enforce IAM` Authentication - `no password`
-  - Hide from public
-- RDS ports:
-  - PostgreSQL: 5432
-  - MySQL: 3306
-  - Oracle RDS: 1521
-  - MSSQL Server: 1433
-  - MariaDB: 3306 (same as MySQL)
-  - Aurora: 5432 (if PostgreSQL compatible) or 3306 (if MySQL compatible)
-
-## Amazon Aurora
-
-- Similar to Postgres, MySQL
-- 5x over MySQL, 3x over Postgres
-- `10GB`-128TB
-- Up to `15 replicas` (sub 10ms replica lag)
-- Cost `>20%` - but more effient
-- `6 copies` of data across `3 AZ`
-- The `master` instance takes `writes` (Provide `Writer Enpoint`)
-- `Reader Endpoint` read from replicas
-- Master failover <30 secouds
-- Cross region replication
-- `Backtrack` restore to timestamp
-- Can have `custom read endpoint` pointing to specific replicas
-- **Aurora Serverless**
-  - Based on actual usage - Pay per second
-  - Good for `infrequent` or `unpredictable` workloads
-- **Aurora Muti-Master**
-  - Uninterruptable writes - Master failover
-  - Every node does R/W
-- **Aurora Global**
-  - 1 primary region (R/W)
-  - Up to 5 (RO) secondary regions (<1 sec lag)
-  - Up to 16 replicas in each secondary region
-  - Promoting another region (< 1 minute)
-- **Aurora Machine Learning**
-  - Can have ML-based predictions to  your application via SQL
-  - Integrated with AWS ML services - [SageMaker, Comprehend]
-  - EXs [fraud detection ads targeting, product recommendations]
-- Backups
-  - Automated
-    - `1-35` days retention
-    - `Cannot be diabled`
-- Can be `clone`
-
-## ElastiCache
-
-- Similar to Redis
-- Store application state (stateless)
-- Redis
-  - Muti-AZ
-  - Read Replicas
-  - Support `Sets, Sorted Sets`
-- MemCached
-  - Not duable - no HA, no persistent, no backup
-  - Multi-thread architecture
-- Security
-  - IAM Auth for `Redis only`
-  - Redis Auth - password/token
-    - Support SSL
-  - Memcached
-    - Support SASL-based Auth
-- Patterns
-  - Lazy Loading: all the read data is cached, data can become stale in cache
-  - Write Through: add data to cache when writing to DB (no stale)
-  - Session Store
-
-## Route 53
-
-- Record Types
-  - A - hostname -> IPv4
-  - AAAA - hostname -> IPv6
-  - CNAME - hostname -> hostname
-    - cannot create for "example.com" but can create for "www.example.com"
-  - NS - hosted zones
-  - Alias - hostname -> point to `AWS resources`
-    - Can be use for root hostname (unlike CNAME)
-    - `Can't set TTL`
-    - Can point to [ELB, CloudFront, API gateway, S3, ...]
-    - Can't be EC2 DNS name
-- Hosted Zones / 0.5$ per month per hosted zone
-  - Public
-  - Private
-- Routing Policies
-  - Simple - point to a `single resource`
-    - Can have `mutiple` values in the same record
-      - `Random` one is chosen by client
-    - Can't be used with health check
-  - Weighted
-    - Can set `%weighted` to each resoruces (sum up to 100%)
-    - Same name, Same type
-    - `All 0 = equally`
-    - Can used with health check
-    - Use cases - [load balancing between region, testing new app versions]
-  - Latency
-    - Point to lowest latency resource
-    - Latency between `user <--> AWS regions`. **Have to select a region**
-    - Can used with health check
-  - Failover
-    - Used of health checkers
-    - Have one Primary, muti-secondary
-  - Geolocation
-    - Different from Latency-based
-    - Based on user `location`
-    - Should specify `Default` record
-    - Continent, Country, State
-    - Use cases - [website localization, retrict content, ...]
-    - Can used with health check
-  - Geoproximity - `Geolocation+Weighted`
-    - Bias (weight-like) for each AWS region /w user location
-    - When you need to `shift traffic` to another region
-  - IP-based
-  - Muti-Value
-    - Point to multiple resources
-    - Can used with health check
-    - Not a replacement for ELB
-    - Up to `8 records` can be return
-- Health Checks
-  - Only for public resources
-  - For automated DNS failover
-    - Monitor an `endpoint`
-    - Monitor `other health check` (**calculated health check**)
-      - Up to `256` child health checks
-      - OR, AND, NOT
-    - Monitor `CloudWatch Alarm` (helpful for private resources)
-  - Health checker
-    - Threshold default = 3
-    - Interval = 30 sec (can be 10 but higher cost)
-    - Protocols - HTTP, HTTPS, TCP
-    - `>18%` = healthy
-    - `2xx or 3xx`= healthy
-    - Text-based response - `5120 bytes` for specific text
-- Domain Registar vs. DNS Service
-  - Domain Registar (e.g., GoDaddy, ...) usually provided with DNS service
-
-## Beanstalk
-
-- `ALB + ASG + EC2 + RDS + ...`
-- Free
-- Components
-  - Application
-  - Version
-  - Environment
-    - `Tiers` - Web Server Env Tier & Worker Env Tier (with SQS)
-    - Can have mutiple Environments (dev, test, prod)
-  - Steps
-    - Create App
-    - Upload version
-    - Launch Env
-    - Manage Env
-
-## S3
+### S3
 
 - Object
   - Max size = `5000GB (TB)`
@@ -583,7 +250,381 @@
     - Modify the object using Lambda before accessing
     - Use cases - [XML to JSON, Resizing/watermarking, Redacting personal info]
 
-## CloudFront
+### Snow Family
+
+- Secure, `portable devices`
+- To `collect/process data` at the edge
+- And `migrate data into/out` of AWS
+- Uses `AWS OpsHub` install on your computer to interact with them
+- Usecases
+  - Data migration (`Physical` route)
+    - Save network bandwidth (save cost)
+    - `Pay per` data transfer `job`
+  - Edge computing
+    - No internet / no computing power
+    - Usecases
+      - Preprocess data
+      - ML at the edge
+      - Transcode media
+- **Snowcone** device - 2CPUs, 4GB, `Wifi, USB-C power`
+  - Small, rugged - space constrained env
+  - Your own battery/cable
+  - Types
+    - Snowcone - 8TB of HDD
+    - Snowcone SSD - 14TB of SSD
+  - Ship to AWS `offline` **or** connect to internet and use `AWS DataSync`
+- **Snowball Edge** device
+  - AWS ship the device to client
+  - Client load data to the device
+  - Client ship the device to AWS
+  - AWS import data to S3, etc. (**Not Glacier**)
+  - All can run EC2, Lambda (using IoT Greengrass)
+  - 1-3 years discount price
+  - Types
+    - Edge Storage Optimized
+      - 40 vCPUs, 80GB
+      - 80TB
+    - Edge Compute Optimized
+      - 104 vCPUs, 416GB
+      - 42TB of HDD or 28TB NVMe
+      - Clustering, up to 16 nodes
+- **Snowmobile**
+  - `A truck`
+  - If need to transfer Exabytes of data (1,000,000TB)
+  - Each truck can carry `100PB`
+  - Temperature controlled, GPS, 24/7 CCTV
+  - More than 10PB, better than Snowball
+
+### FSx - 3rd party high-performance file systems
+
+- Lustre, Windows File Server, NetApp ONTAP, OpenZFS
+- **Windows File Server**
+  - SMB and NTFS protocol
+  - `MS Active Directory` integration, ACLs, user quotas
+  - `Can be mounted on Linux`
+  - Support MS Distributed File System (DFS) Namespaces (group files across multiple FS)
+  - Scale up to 10s of GB/s, millions of IOPS, 100s PB of data
+  - Storage Options 
+    - SSD - DB, Media processing, Data analytics
+    - HDD
+  - Can be connected via `VPN/Direct Connect`
+  - Can be `Multi-AZ`
+  - Backup `daily to S3`
+- **Lustre**
+  - Parallel `distributed` FS, `large-scale` computing
+  - Lustre = Linux + Cluster
+  - ML, High Performance Computing (`HPC`)
+  - Usecases - Video Processing, Financial Modeling
+  - Up to 100s GB/s, millions of IOPS, `sub-ms latency`
+  - `Seamless integration with S3`
+    - Can "*read S3*" as FS
+    - Can write to S3
+  - Can be connected via `VPN/Direct Connect`
+- **NetApp ONTAP**
+  - SMB, NFS, iSCSI protocol
+  - Use for `moving workloads` running on `ONTAP/NAS -> AWS`
+  - `Work with everything`
+  - Storage `shrinks or grows automatically`
+  - `Backup with low cost`
+  - Can be `Multi-AZ`
+  - Storage `de-dupe, compression`
+- **OpenZFS**
+  - `Only NFS` protocol
+  - `ZFS -> AWS`
+  - `Work with everything`
+  - Up to `1mil IOPS`, `<0.5ms` latency
+- Deployment Options
+  - Scratch FS
+    - Temporary
+    - High burst (6x faster)
+    - Usage - short-term processing, optimize costs
+  - Persistent FS
+    - Long-term
+    - Replicated within the same AZ (at least 2 copies)
+    - Failover within minutes
+    - Usage - long-term processing, sensitive data
+
+### Storage Gateway - Hybrid Cloud for Storage
+
+- Bridge Cloud <-> on-premises data
+- Usecases - DR, Backup, on-premises cache & low-latency
+- Types
+  - **S3** File Gateway
+    - `Mount S3 as FS` to your on-premise server (NFS, SMB)
+    - Send `HTTPS` requests to S3
+    - Has `cache`
+    - IAM role for each File Gateway
+    - SMB can be authenticated with Active Directory (AD)
+  - **FSx** File Gateway
+    - `Mount FSx` to your on-premise server (NTFS, SMB)
+    - `Better than pure FSx` because it has `cache`
+  - **Volume** Gateway (Block Storage - EBS)
+    - **Goal** - `Backup` on-premise data to S3 (iSCSI)
+    - Cache volumes - Only cache on premise
+    - Stored volumes - All on premise, backup to S3
+  - **Tape** Gateway
+    - **Goal** - `Backup` on-premise data to S3 (iSCSI)
+- Hardware appliance
+  - Buy `Storage Gateway hardware` from Amazon
+
+### Transfer Family
+
+- `FTP upload to S3, EFS`
+- Protocols
+  - FTP
+  - FTPS
+  - SFTP
+- Multi-AZ
+- Pay per provisioned endpoint per hour + data transfer in GB
+- Authentication
+  - Service own managed
+  - Integrate with MS-AD, LDAP, Okta, Cognito, custom
+- Can connect through Route53
+
+### DataSync
+
+- Move `large` amount of data `to and from`
+- Sync To-From
+  - On-premises - `needs agent`
+  - Other cloud - `needs agent`
+  - S3
+  - EFS
+  - FSx
+- Replication tasks `can be scheduled` - hourly, daily, weekly
+- **`Keep` original `file permission (metadata)` (NFS, POSIX, SMB, ...)**
+- Can used up to 10 GB/s (can setup with bandwidth limit)
+- `Avoid` using `network cap` by **using `Snowcone`**
+
+### ELB (Elastic Load Balancer)
+
+- Features
+  - Health check
+    - "/health" route return 200
+    - if `unhealthy` will be `terminated`
+  - Provide HTTPS
+  - Stickiness with cookies
+  - Separate public/private traffic
+- Can be integrated with: [EC2, ACM, CloudWatch, Route 53]
+- Types
+  - CLB (Classic) (`Deplecated`): HTTP, HTTPS, TCP
+    - Sticky Sessions (Session Affinity)
+  - ALB (layer 7): HTTPf, HTTPS, WebSocket
+    - Can route to `multiple path at the same time`
+      - .../user to micro service 1
+      - .../search to micro service 2
+    - Can route to `multiple query string parameter`
+      - .../?Platform=Mobile to micro service 1
+      - .../?Platform=Desktop to micro service 2
+    - Don't see the true IP of clients, can get port from (X-Forwareded-Port) and proto (X-Forwareded-Proto)
+    - Latency `~400ms`
+    - Sticky Sessions (Session Affinity)
+    - Cookie names are reserved by the ELB (AWSALB, AWSALBAPP, AWSALBTG).
+    - Server Name Indication (`SNI`) allows you to expose multiple HTTPS applications each with its own SSL certificate on the same listener
+  - NLB: TCP, TLS, UDP: layer 4
+    - Millions of requests per sec
+    - Latency `~100ms`
+    - `Not in free tier`
+    - `On static IP per AZ` and support for Elastic IP
+    - Sticky Sessions (Session Affinity)
+  - GWLB (Gateway): layer 3 (Network Layer): IP packets
+    - Examples: [Firewalls, Intrusion Detection, Payload manipulation, ...]
+- Cross-Zone Load Balancing 
+  - (`Enable by default`) for ALB, not for NLB/CLB
+  - With: Distribute evenly across all instances in all AZ
+  - Without: Distribute evenly across all AZ (depend on number of instances in the AZ)
+  - No charge for inter AZ data
+- Connection Draining (Deregistration Delay)
+  - Time to complete requests while the instance is de-registering or unhealthy
+  - Stop sending request to the de-refistered instance
+  - 1-3600 sec
+  - Can be disabled
+
+## Compute Services
+
+### EC2
+
+- Storage
+  - Network-attached: [EBS, EFS]
+  - Hardware: ECS Instance Store
+- Bootstrap
+  - EC2 User data script: run once at first start
+  - Run with the root user
+- Types
+  - General Purpose
+  - Compute Optimized
+  - Media transcoding
+  - ML
+  - Gaming server
+  - Memory Optimized: [Database, Web cache, Real-time processing]
+  - Storage Optimized [Database, Redis, Distributed file systems]
+- Security Group
+  - Only contain allow rules
+  - Can be attached to multiple instances
+  - Bound to a region/VPC combination
+  - If traffic being blocked by Security Group rules: "time out"
+  - If there is an application error: "connection refuse"
+  - Can reference to other Security Groups
+- Purchasing Option
+  - On-Demand (Default)
+    - Billing
+      - Linux / Windows
+        - Per sec
+      - All other
+        - Per hour
+  - Reserved / Convertible Reserved (1-3 years)
+    - Long workloads
+    - 72% discount
+    - Payment Option: [NoUpfront, PartialUpfront, AllUpfront]
+  - Saving Plan  (1-3 years)
+    - Commit to an amount of usage in dollar
+    - `72%` discount
+    - Commit to like ($10/hour for 1-3 years)
+    - Usage beyond that will be billing at the default price
+    - Locked to specific instance type and region
+  - Spot
+    - Short workloads, cheap, can lose instances
+    - Up to `90%` discount
+    - Lose when your `(willing max price<spot price)`
+      - 2 minutes to stop or terminate
+    - Suited for workloads acceptable for failure
+      - [Batch jobs, Data analysis, Image processing, Distributed workloads, Flexible start/end time]
+    - *OLD*: spot block: 1-6 hours
+    - `One-time / Persistent`
+    - Spot Fleets = Spots + (optional) On-demand
+  - Dedicated Hosts (whole physical server)
+    - Compliant reason, your own software license
+  - Dedicated Instances (no other customers sharing your hardware)
+  - Capacity Reservations
+    - Reserve capacity in specific AZ
+    - No discount
+    - Make sure to have the instances
+- Placement Groups
+  - Cluster: Same rack, Same AZ (10 Gbps)
+  - Spread: Multi-AZ
+    - limit 7 instances/AZ/group
+  - Partition: Multi-rack in AZ, Multi-AZ
+    - [HDFS, HBase, Cassandra, Kafka]
+- ENI (Elastic Network Interfaces)
+  - Virtual network card
+  - 1 primary IPv4, muti-secondary IPv4, mult-security-group, 1 MAC address
+  - Bound to a specific AZ
+  - An EC2 can have muti-ENI
+- Hibernate: RAM (`<150GB`) state is preserved in EBS
+  - Stop - EBS is kept (takes time when start)
+  - Terminate - EBS destroy
+  - Hibernate <60 days
+- AMI (Amazon Machine Image)
+  - Bound to a `specific region`
+  - Types: [Amazon, Custom, Marketplace]
+
+### ASG (Auto Scaling Group)
+
+- Scale out/in the match the load
+- Can set min/max number of instances running
+- Automatically register new instances to load balancer
+- Min/Desired/Max capacity
+- Scaling policy
+  - Scale based on CloudWatch alarms
+  - Types
+    - Target Tracking: average ASG CPU to stay ~40%
+    - Simple / Step: Cloudwatch alarm, then add 2 unit
+    - Scheduled Actions
+    - Predictive: continuously forecast load and schedule scaling ahead
+  - Good metrics
+    - CPUUtil (avg)
+    - RequestCountPerTarget
+    - Average Network in/out
+    - Any custom cloudwatch metric
+  - Scaling Cooldowns: 300 seconds
+    - After scaling, not launch or terminate additional instances
+
+### Beanstalk
+
+- `ALB + ASG + EC2 + RDS + ...`
+- Free
+- Components
+  - Application
+  - Version
+  - Environment
+    - `Tiers` - Web Server Env Tier & Worker Env Tier (with SQS)
+    - Can have mutiple Environments (dev, test, prod)
+  - Steps
+    - Create App
+    - Upload version
+    - Launch Env
+    - Manage Env
+
+## Network Services
+
+### Route 53
+
+- Record Types
+  - A - hostname -> IPv4
+  - AAAA - hostname -> IPv6
+  - CNAME - hostname -> hostname
+    - cannot create for "example.com" but can create for "www.example.com"
+  - NS - hosted zones
+  - Alias - hostname -> point to `AWS resources`
+    - Can be use for root hostname (unlike CNAME)
+    - `Can't set TTL`
+    - Can point to [ELB, CloudFront, API gateway, S3, ...]
+    - Can't be EC2 DNS name
+- Hosted Zones / 0.5$ per month per hosted zone
+  - Public
+  - Private
+- Routing Policies
+  - Simple - point to a `single resource`
+    - Can have `mutiple` values in the same record
+      - `Random` one is chosen by client
+    - Can't be used with health check
+  - Weighted
+    - Can set `%weighted` to each resoruces (sum up to 100%)
+    - Same name, Same type
+    - `All 0 = equally`
+    - Can used with health check
+    - Use cases - [load balancing between region, testing new app versions]
+  - Latency
+    - Point to lowest latency resource
+    - Latency between `user <--> AWS regions`. **Have to select a region**
+    - Can used with health check
+  - Failover
+    - Used of health checkers
+    - Have one Primary, muti-secondary
+  - Geolocation
+    - Different from Latency-based
+    - Based on user `location`
+    - Should specify `Default` record
+    - Continent, Country, State
+    - Use cases - [website localization, retrict content, ...]
+    - Can used with health check
+  - Geoproximity - `Geolocation+Weighted`
+    - Bias (weight-like) for each AWS region /w user location
+    - When you need to `shift traffic` to another region
+  - IP-based
+  - Muti-Value
+    - Point to multiple resources
+    - Can used with health check
+    - Not a replacement for ELB
+    - Up to `8 records` can be return
+- Health Checks
+  - Only for public resources
+  - For automated DNS failover
+    - Monitor an `endpoint`
+    - Monitor `other health check` (**calculated health check**)
+      - Up to `256` child health checks
+      - OR, AND, NOT
+    - Monitor `CloudWatch Alarm` (helpful for private resources)
+  - Health checker
+    - Threshold default = 3
+    - Interval = 30 sec (can be 10 but higher cost)
+    - Protocols - HTTP, HTTPS, TCP
+    - `>18%` = healthy
+    - `2xx or 3xx`= healthy
+    - Text-based response - `5120 bytes` for specific text
+- Domain Registar vs. DNS Service
+  - Domain Registar (e.g., GoDaddy, ...) usually provided with DNS service
+
+### CloudFront
 
 - Is a CDN (content delivery network)
 - Read performance, cache at the edge
@@ -616,7 +657,7 @@
 - Cache Invalidations
   - `Force cache refresh` before TTL expired
 
-## Global Accelerator
+### Global Accelerator
 
 - Uses `"Anycast IP"`
   - Anycast IP - multiple servers share the same IP, client connect to the closes server
@@ -628,47 +669,122 @@
 - Can served `Non-HTTP` (TCP, UDP, MQTT) unlike CloudFront
 - Or for `HTTP` that `required static IP`
 
-## Snow Family
+## Database Services
 
-- Secure, `portable devices`
-- To `collect/process data` at the edge
-- And `migrate data into/out` of AWS
-- Uses `AWS OpsHub` install on your computer to interact with them
-- Usecases
-  - Data migration (`Physical` route)
-    - Save network bandwidth (save cost)
-    - `Pay per` data transfer `job`
-  - Edge computing
-    - No internet / no computing power
-    - Usecases
-      - Preprocess data
-      - ML at the edge
-      - Transcode media
-- **Snowcone** device - 2CPUs, 4GB, `Wifi, USB-C power`
-  - Small, rugged - space constrained env
-  - Your own battery/cable
-  - Types
-    - Snowcone - 8TB of HDD
-    - Snowcone SSD - 14TB of SSD
-  - Ship to AWS `offline` **or** connect to internet and use `AWS DataSync`
-- **Snowball Edge** device
-  - AWS ship the device to client
-  - Client load data to the device
-  - Client ship the device to AWS
-  - AWS import data to S3, etc.
-  - All can run EC2, Lambda (using IoT Greengrass)
-  - 1-3 years discount price
-  - Types
-    - Edge Storage Optimized
-      - 40 vCPUs, 80GB
-      - 80TB
-    - Edge Compute Optimized
-      - 104 vCPUs, 416GB
-      - 42TB of HDD or 28TB NVMe
-      - Clustering, up to 16 nodes
-- **Snowmobile**
-  - `A truck`
-  - If need to transfer Exabytes of data (1,000,000TB)
-  - Each truck can carry `100PB`
-  - Temperature controlled, GPS, 24/7 CCTV
-  - More than 10PB, better than Snowball
+### RDS (Relational Database Service)
+
+- Advantages
+  - OS Patching
+  - Backup and restore to specific timestamp
+  - Monitoring
+  - Read replicas for better read performance
+  - Multi AZ for Disaster Recovery (DR)
+  - Scaling
+  - `But cannot SSH`
+- Storage Auto Scaling
+  - Increase storage for you dynamically
+  - Can set `Max storage threshold`
+  - Useful for `unpredictable workloads`
+- Read Replicas
+  - `Up to 15`
+  - Within AZ, Cross AZ, Cross region
+  - Replication is Async (`Eventually consistent`)
+  - Replicas can be promoted to their own DB
+  - Network Cost: traffics in the `same region` are free
+  - `Can be set up as DR`
+- Multi AZ (DR)
+  - SYNC replication (replicate everything)
+  - One DNS name - failover
+  - Just for standby - not for scaling
+  - Automatic Steps from Single-AZ to Multi-AZ
+    - A snapshot taken
+    - A new DB restored from the snapshot in a new AZ
+    - Sync
+- RDS Custom: Manage OS and DB Customization
+  - `Oracle`, `Microsoft SQL Server`
+  - Configure settings, Install patches, Enable native features, SSH
+  - `De-activate Automation Mode` to do customization
+- Backups
+  - Automated
+    - `Daily` full backup
+    - Transaction `logs` every `5 minutes`
+    - `1-35` days retention
+  - Manual Snapshots
+    - `No limit` retention
+- Security
+  - Can be encrypted
+  - if master not encrypted replicas cannot be encrypted
+  - `TLS-ready` by default
+  - Instead of username/pw, you can also use `IAM roles`
+  - `Security Groups` can be applied
+  - `No SSH` - except RDS custom
+  - Audit logs can be add to CloudWatch
+- RDS Proxy - Load Balancer - Autoscaling
+  - Improve DB efficiency - Combine similar DB connection before sending to the actual RDS
+  - Reduce failover time by `66%`
+  - `Enforce IAM` Authentication - `no password`
+  - Hide from public
+- RDS ports:
+  - PostgreSQL: 5432
+  - MySQL: 3306
+  - Oracle RDS: 1521
+  - MSSQL Server: 1433
+  - MariaDB: 3306 (same as MySQL)
+  - Aurora: 5432 (if PostgreSQL compatible) or 3306 (if MySQL compatible)
+
+### Amazon Aurora
+
+- Similar to Postgres, MySQL
+- 5x over MySQL, 3x over Postgres
+- `10GB`-128TB
+- Up to `15 replicas` (sub 10ms replica lag)
+- Cost `>20%` - but more effient
+- `6 copies` of data across `3 AZ`
+- The `master` instance takes `writes` (Provide `Writer Enpoint`)
+- `Reader Endpoint` read from replicas
+- Master failover <30 secouds
+- Cross region replication
+- `Backtrack` restore to timestamp
+- Can have `custom read endpoint` pointing to specific replicas
+- **Aurora Serverless**
+  - Based on actual usage - Pay per second
+  - Good for `infrequent` or `unpredictable` workloads
+- **Aurora Muti-Master**
+  - Uninterruptable writes - Master failover
+  - Every node does R/W
+- **Aurora Global**
+  - 1 primary region (R/W)
+  - Up to 5 (RO) secondary regions (<1 sec lag)
+  - Up to 16 replicas in each secondary region
+  - Promoting another region (< 1 minute)
+- **Aurora Machine Learning**
+  - Can have ML-based predictions to  your application via SQL
+  - Integrated with AWS ML services - [SageMaker, Comprehend]
+  - EXs [fraud detection ads targeting, product recommendations]
+- Backups
+  - Automated
+    - `1-35` days retention
+    - `Cannot be diabled`
+- Can be `clone`
+
+### ElastiCache
+
+- Similar to Redis
+- Store application state (stateless)
+- Redis
+  - Muti-AZ
+  - Read Replicas
+  - Support `Sets, Sorted Sets`
+- MemCached
+  - Not duable - no HA, no persistent, no backup
+  - Multi-thread architecture
+- Security
+  - IAM Auth for `Redis only`
+  - Redis Auth - password/token
+    - Support SSL
+  - Memcached
+    - Support SASL-based Auth
+- Patterns
+  - Lazy Loading: all the read data is cached, data can become stale in cache
+  - Write Through: add data to cache when writing to DB (no stale)
+  - Session Store
