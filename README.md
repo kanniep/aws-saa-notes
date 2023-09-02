@@ -369,7 +369,7 @@
 
 ### Transfer Family
 
-- `FTP upload to S3, EFS`
+- **`FTP into/out of S3, EFS`**
 - Protocols
   - FTP
   - FTPS
@@ -383,7 +383,7 @@
 
 ### DataSync
 
-- Move `large` amount of data `to and from`
+- **Move/Migrate** `large` amount of data `to and from`
 - Sync To-From
   - On-premises - `needs agent`
   - Other cloud - `needs agent`
@@ -788,3 +788,105 @@
   - Lazy Loading: all the read data is cached, data can become stale in cache
   - Write Through: add data to cache when writing to DB (no stale)
   - Session Store
+
+## Integration & Messaging Services
+
+### SQS
+
+- **Oldest service**
+- Unlimited throughput/number of messages
+- Retention - `4 days` (**default**) up to `14 days`
+- Low latency (<10ms)
+- 256KB/message
+- **`At least once delivery`**
+- **`Best effort ordering`**
+- Consumer
+  - Up to `10 messages` at once
+  - `Read then delete`
+- Access Controls - IAM policies
+  - **SQS Access Policies**
+    - For `cross-account`
+    - For allowing `other services` (SNS, S3, ...) to write
+- Message Visibility Timeout
+  - Mes1 pulled by Con1, it becomes **invisible** to other consumbers
+  - For `30 secs` (**default**) then the message will be `put back` to the queue
+  - Can use `ChangeMessageVisibility API` to get more time
+- Long Polling - `1 to 20` secs (`WaitTimeSeconds`)
+  - Minimized number of Calls
+  - Improve efficiency and latency
+- FIFO (First In First One) Queue
+  - Guarantee
+    - Order
+    - No duplicated messages
+  - Limitations
+    - `300 msg/s`
+    - `3000 msg/s with batching`
+
+### SNS
+
+- Pub/Sub
+- **`Every subscriber get every messages`**
+- `New feature` - can filter messages
+  - `Subscriber` can have `filter policy in JSON`
+- **Unlike SQS - Each consumer gets unique messages**
+- SQS, Lambda, Kinesis can subscribe to SNS
+- `Direct Publish` (for `mobile` apps SDK)
+  - Platform application/endpoint
+  - Works with Google GCM, Apple APNS, Amazon ADM, ...
+- Access Controls - IAM policies
+  - **SNS Access Policies**
+    - For `cross-account`
+    - For allowing `other services` (S3, ...) to write
+- FIFO (First In First One) Topic
+  - Guarantee
+    - Order - by `message group id` (same group are ordered)
+    - No duplicated messages
+  - Limitations
+    - **Only** `SQS FIFO` as `subscriber`
+    - `Same through` put ad `SQS FIFO`
+  - When you need - `Fan out + ordering + deduplication`
+- Subscriptions
+  - Kinesis
+  - SQS
+  - Lambda
+  - Email/Email-JSON
+  - HTTP/HTTPS
+  - SMS
+
+### SNS + SQS: Fan Out
+
+![fanout](fanout.png)
+
+### Kinesis (Stream Big data)
+
+- `Collect`, `Process`, `Analyze` **steaming data** in **real-time**
+- Kinesis **Data Steams** - Capture, Process, Store `data` streams
+  - Retention - `1 to 365 days`
+  - Can `replay` data
+  - `Immutable` data
+  - Same partition goes to the same shard (`ordering`)
+  - Producers - SDK, KPL (Kinesis Producer Lib), Kinesis Agent
+    - Record
+      - Patition Key
+      - Data Blob (up to 1MB)
+  - Shards - Number of parallelize (scale) stream power
+  - Consumers - SDK, KPL (Kinesis Producer Lib), Lambda, Firehose, Analytics
+    - Record
+      - Patition Key
+      - Sequence number
+      - Data Blob (up to 1MB)
+  - Capacity Modes
+    - **Provisioned** - choose number of shards
+      - Produce - 1 MB/sec or 1000 msg/sec/shard
+      - Consume
+        - **Shared** - `2 MB`/sec/shard shared to `all consumers`
+        - **Enhanced fan-out** - `2 MB`/sec/shard/`consumber`
+      - Pay `per shard per hour`
+    - **On-demand** - automatic scaling
+      - 200 MB/sec or 200,000 msg/sec/shard
+      - Pay `per stream per hour` & `data in/out per GB`
+- Kinesis **Data Firehose** - Load data streams `to AWS` data stores
+- Kinesis **Data Analytics** - `Analyze` data streams with SQL or Apache Flink
+- Kinesis **Video Stream** - Capture, Process, Store `video` streams
+
+### Active MQ
