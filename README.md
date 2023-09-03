@@ -919,3 +919,30 @@
 - Runs on `servers` in `Multi-AZ` with failover
   - `Ative and standby` not parallelize
 - Has `queue (SQS-like) and notification (SNS-like)`
+
+## Integration & Messaging Services
+
+### ECS (Elastic Container Service)
+
+- Launch ECS `Tasks` on ECS `Clusters`
+- Launch Types
+  - EC2s - provision & maintain the instances your self
+    - IAM Roles
+      - `EC2 Instance Profile`
+        - Used by the ECS agent
+        - Make API calls to `ECS service`
+        - Send `logs` to CloudWatch
+        - Pull `Docker` images from ECR
+        - Manage `sensitive data`
+      - `ECS Task Role` - Define in Task Definition
+  - Fargate
+    - `Serverless`
+    - Create `task definition`, CPU/RAM, run
+    - Increase number of tasks to scale
+- Load Balancer Integration
+  - ALB - supported in most cases
+  - NLB - recommended only for high performance
+- Data Volumes (`EFS`)
+  - Mount to ECS tasks
+  - **Fargate + EFS = Serverless**
+  - `Persistent multi-AZ`
