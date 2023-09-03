@@ -825,6 +825,7 @@
 ### SNS
 
 - Pub/Sub
+- `Not persistence`
 - **`Every subscriber get every messages`**
 - `New feature` - can filter messages
   - `Subscriber` can have `filter policy in JSON`
@@ -846,7 +847,7 @@
     - `Same through` put ad `SQS FIFO`
   - When you need - `Fan out + ordering + deduplication`
 - Subscriptions
-  - Kinesis
+  - `Kinesis Data Firehose`
   - SQS
   - Lambda
   - Email/Email-JSON
@@ -860,7 +861,8 @@
 ### Kinesis (Stream Big data)
 
 - `Collect`, `Process`, `Analyze` **steaming data** in **real-time**
-- Kinesis **Data Steams** - Capture, Process, Store `data` streams
+- Kinesis **Data Steams** - **Real-time big data**
+  - Real Time - `200ms`
   - Retention - `1 to 365 days`
   - Can `replay` data
   - `Immutable` data
@@ -870,6 +872,7 @@
       - Patition Key
       - Data Blob (up to 1MB)
   - Shards - Number of parallelize (scale) stream power
+    - **1 consumer per shard if you want to remain ordering**
   - Consumers - SDK, KPL (Kinesis Producer Lib), Lambda, Firehose, Analytics
     - Record
       - Patition Key
@@ -886,7 +889,33 @@
       - 200 MB/sec or 200,000 msg/sec/shard
       - Pay `per stream per hour` & `data in/out per GB`
 - Kinesis **Data Firehose** - Load data streams `to AWS` data stores
+  - Producers - SDK, KPL (Kinesis Producer Lib), Kinesis Agent, `Data stream`, `CloudWatch`
+    - Record
+      - Patition Key
+      - Data Blob (up to 1MB)
+      - Can be transform using Lambda
+  - `Write to Destinations`
+    - AWS `S3`
+    - AWS `Redshift`
+    - AWS `OpenSearch`
+    - Datadog
+    - Splunk
+    - `MongoDB`
+    - `HTTP endpoint`
+  - `Pay` for data `going through` Firehose
+    - Auto Scaling - **Serverless**
+  - **Near Real Time**
+    - 60 secs latency
+    - 1 MB at a time
 - Kinesis **Data Analytics** - `Analyze` data streams with SQL or Apache Flink
 - Kinesis **Video Stream** - Capture, Process, Store `video` streams
 
-### Active MQ
+### Amazon MQ
+
+- Open messaging protocol
+  - MQTT, AMQP, STOMP, Openwire, WSS
+- `Don't want to migrate` to SQS, SNS
+- `Doesn't scale` as much as SQS/SNS
+- Runs on `servers` in `Multi-AZ` with failover
+  - `Ative and standby` not parallelize
+- Has `queue (SQS-like) and notification (SNS-like)`
