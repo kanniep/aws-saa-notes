@@ -920,7 +920,7 @@
   - `Ative and standby` not parallelize
 - Has `queue (SQS-like) and notification (SNS-like)`
 
-## Integration & Messaging Services
+## Container Services
 
 ### ECS (Elastic Container Service)
 
@@ -946,3 +946,64 @@
   - Mount to ECS tasks
   - **Fargate + EFS = Serverless**
   - `Persistent multi-AZ`
+- Task Definition
+  - CPU/RAM
+  - Task Role - IAM Role
+- `ECS` Auto Scaling
+  - Scale by `Application Auto Scaling`
+    - CPU Util
+    - Memory Util
+    - Request Count Per Target (metric coming from ALB)
+  - Scale by `Target Tracking`
+    - CloudWatch Metric
+  - Scale by `Step Scaling`
+    - CloudWatch Alarm
+  - Scale by `Schedule Scaling`
+- `EC2` Instances Auto Scaling (Cluster Capacity) (for EC2 launch type)
+  - Auto Scaling Group
+  - **ECS Cluster Capacity Provider**
+- **ECS Tasks by EventBridge**
+  - Trigger by event - Process S3 data went uploaded
+  - On schedule
+
+### EKS (Elastic Kubernetes Service)
+
+- Support `EC2`, `Fargate` Launch mode
+
+### ECR (Elastic Container Registry)
+
+- Backed by `S3`
+- `Access` controlled by `IAM`
+- Supports vulnerability scanning, lifecycle
+- Node Types
+  - `Managed Node Groups`
+    - AWS Auto-manage
+    - Nodes are part of ASG
+    - Support On-demand/Spot
+  - `Self-Managed Node`
+    - Manually register nodes
+    - Support On-demand/Spot
+  - `Fargate`
+- Data Volumes
+  - Need to Specify `StorageClass`
+  - Uses a `Container Storage Interface` (`CSI`) compliant driver
+  - Support for
+    - EBS
+    - **EFS (also works with Fargate)**
+    - FSx for Lustre
+    - FSx for NetApp ONTAP
+
+### App Runner
+
+- Easy deploy `web app` and `APIs` at `scale`
+- `Serverless`
+- Settings
+  - Container image
+  - vCPU/RAM
+  - AutoScaling
+  - Health Check
+- Provide
+  - URL
+- Pay per compute resources
+  - vCPU/hour
+  - RAM/GB/hour
