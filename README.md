@@ -1007,3 +1007,187 @@
 - Pay per compute resources
   - vCPU/hour
   - RAM/GB/hour
+
+## Serverless Services
+
+### Lambda
+
+- Virtual functions `outside of your VPC`
+- **Increasing RAM also improve CPU and network**
+- Run on-demand
+- Automated scaling
+- Pay per
+  - request
+  - compute time - increment of 1ms
+  - **Free tier** `1mil requests`, `400,000 GB-secs` (RAM)
+- Resources
+  - Up to `10GB` of RAM
+- Language support
+  - Node.js
+  - Python
+  - Java
+  - .Net core
+  - Golang
+  - Powershell
+  - Ruby
+  - Custom Runtime API (ex. Rust)
+  - `Lambda Container Image` (Need `Lambda Runtime API`)
+- **Limits to know - `Per region`**
+  - Execution
+    - RAM - `128MB` -> `10GB` (1 MB increment)
+    - Compute time - `15 minutes`
+    - Env variable - Up to `4KB`
+    - Disk (in /tmp) 512MB to 100GB
+    - Concurrency - 1000
+  - Deployment
+    - Size compressed - Up to `50MB`
+    - Size uncompressed - Up to `250MB`
+    - Can use /tmp to load other files at startup
+    - Env variable - Up to `4KB`
+- At the Edge
+  - Edge Function - Attach to CloudFront Distribution
+    - **CloudFront Function**
+      - Lightweight `JS`
+      - `Sub ms` startup
+      - `Millions` of req/sec
+      - Used for - `Transform` viewer `reqeust/response`
+      - `Native` CloudFront's feature
+      - Manage the `code within CloudFront`
+      - `No storage, No network access`
+      - Execution time `<1ms`
+      - Usecases
+        - Cache key normalization
+        - Header manipulation
+        - URL `rewrites/redirect`
+        - Request authen/author
+    - **Lambda@Edge**
+      - `NodeJS/Python`
+      - `5-10 s` startup
+      - `1000s` req/sec
+      - Used for - `Transform` CloudFront's `reqeust/response`
+- Lambda in VPC
+  - Define VPC-ID/Subnets/SG
+  - It will create ENI (Elastic Network Interface)
+  - Usecases
+    - Lambda with `RDS Proxy` (Too many Lambda connect to RDS is bad - use Proxy)
+- `Invoke` Lambda from `RDS & Aurora`
+  - Process `data event`
+  - RDS - PostgreSQL, MySQL
+  - **Must allow outbound traffic to your Lambda** - from your DB
+  - **Must have the required permission** - Lambda resource-based & IAM Policy
+  - Event Notifications - `No information about the actual data`
+    - Created, Stopped, Started, ...
+    - Near real-time events (up to `5 minutes`)
+    - Send notification to `SNS or EventBridge`
+
+### DynamoDB
+
+- Serverless
+- Scales to `massive workloads`
+- Millions of req/sec, trillions of rows, 100s of TB
+- `Sigle-digit ms`
+- Max `item` size is `400KB`
+- Supported Data Types
+  - Scala Types - String, Number, Binary, Boolean, Null
+  - Document Types - List, Map
+  - Set Types - String Set, Number Set, Binary Set
+- Table Classes
+  - Standard
+  - IA
+- Capacity Modes
+  - Provisioned Mode (default) - specify in advance
+    - Specify reads/writes per sec
+    - Pay for `Read Capacity Units (RCU) & Write Capacity Units (WCU)`
+    - Can add `auto-scaling` mode for RCU/WCU
+  - On-Demand Mode
+    - Pay for `number of reads/writes`
+    - **Unpredictable, Stepp sudden spikes**
+- DynamoDB Accelerator (DAX)
+  - `10x performance`
+  - In-memory cache - `Query & Scan` cache
+  - **`Microseconds`** latency
+  - Uses the `same DynamoDB APIs`
+  - Default 5 minutes TTL
+- Stream Processing
+  - Item-level modifications (create/update/delete)
+  - Use cases
+    - React to changes in real-time (`welcome email to users`)
+    - Cross-region replication
+    - Invoke Lambda
+  - DynamoDB Streams
+    - 24 hours retention
+    - Limited # of consumers
+    - Process using Lambda Triggers or DynamoDB Stream Kinesis adapter
+  - Kinesis Data Streams
+    - 1 year retention
+    - High # of consumers
+    - Process using Lambda, Others Kinesis, Gue, Stream ETL
+- Global Table (`Replication`)
+  - `Two way` replication (read/write)
+  - Must `enable` `Dynamo Stream`
+- Time To Live (TTL) - `Item retention time`
+  - **`Web session handling`**
+- Backups for DR
+  - Continuous backups (`PITR`)
+    - Optional
+    - Last 35 day
+  - On-demand backups
+    - `Doesn't affect performance/latency`
+  - Import/Export to `S3` (`must enable PITR`)
+    - JSON or ION format
+
+### API Gatway (Rest API)
+
+- WebSocket
+- Manages
+  - API version
+  - Environments
+  - Auth
+  - API keys
+  - Swagger
+  - `Transform/Validate` req/res
+  - `Cache` API responses
+- Integrations
+  - Lambda
+  - HTTP
+  - AWS Services
+    - AWS `Step workflow`, post messages to `SQS`
+  - Kinesis Data Streams
+- Endpoint Types
+  - **Edge-Optimized** (default)
+    - Go through `CloudFront Edge`
+    - `Then route` to your API Gateway
+  - **Regional**
+  - **Private**
+    - Access `within` your `VPC` (`ENI`)
+    - Use `resource policy` to control access
+- Security
+  - Authen
+    - IAM Roles
+    - Cognito
+    - Custom Authorizer
+  - HTTPS - with ACM
+
+### Step Function
+
+- `Orchestrate` your `Lambda functions`
+- Sequence, Parallel, Conditions, Timeouts, Error Handling
+- Can integrate with EC2, ECS, On-premises, API Gateway SQS, etc...
+- Can have `human approval` steps
+
+  ![step-function](step-function.png)
+
+### Cognito
+
+- `User identity provider` for your application
+- **Cognito User Pools** - 100s of users
+  - `Sign in` for app users
+  - Integrate with `API gateway & ALB`
+  - Username/password
+  - Email & phone
+  - `MFA`
+  - `Facebook, Google, SAML`
+- **Cognito Identify Pools** (Federated Identity)
+  - Give **temporary** `AWS credentials` to `access` AWS `resources`
+  - User sources - Cognito User Pool, 3party
+  - Access AWS services directly or through API Gateway
