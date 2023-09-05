@@ -692,10 +692,10 @@
   - Replicas can be promoted to their own DB
   - Network Cost: traffics in the `same region` are free
   - `Can be set up as DR`
-- Multi AZ (DR)
+- **Multi AZ (DR)**
   - SYNC replication (replicate everything)
   - One DNS name - failover
-  - Just for standby - not for scaling
+  - `Just for standby` - not for scaling
   - Automatic Steps from Single-AZ to Multi-AZ
     - A snapshot taken
     - A new DB restored from the snapshot in a new AZ
@@ -719,9 +719,9 @@
   - `Security Groups` can be applied
   - `No SSH` - except RDS custom
   - Audit logs can be add to CloudWatch
-- RDS Proxy - Load Balancer - Autoscaling
-  - Improve DB efficiency - Combine similar DB connection before sending to the actual RDS
-  - Reduce failover time by `66%`
+- **RDS Proxy** - Load Balancer - Autoscaling
+  - `Improve DB efficiency` - Combine similar DB connection before sending to the actual RDS
+  - Reduce `failover` time by `66%`
   - `Enforce IAM` Authentication - `no password`
   - Hide from public
 - RDS ports:
@@ -736,7 +736,7 @@
 
 - Similar to Postgres, MySQL
 - 5x over MySQL, 3x over Postgres
-- `10GB`-128TB
+- 10GB-128TB
 - Up to `15 replicas` (sub 10ms replica lag)
 - Cost `>20%` - but more effient
 - `6 copies` of data across `3 AZ`
@@ -770,9 +770,9 @@
 ### ElastiCache
 
 - Similar to Redis
-- Store application state (stateless)
+- Store application `state` (stateless)
 - Redis
-  - Muti-AZ
+  - `Muti-AZ`
   - Read Replicas
   - Support `Sets, Sorted Sets`
 - MemCached
@@ -788,6 +788,48 @@
   - Lazy Loading: all the read data is cached, data can become stale in cache
   - Write Through: add data to cache when writing to DB (no stale)
   - Session Store
+
+### DocumentDB
+
+- Is the AWS implementation of `MongoDB`
+- Store JSON data
+- Similar `deployment concept as Aurora`
+- Across `3 AZ`
+- 10GB - 64TB
+
+### Neptune
+
+- `Graph DB` - **social network**, **Wikipedia**
+- Up to `15 replicas` across `3 AZ`
+
+### Keyspaces (for Apache Cassandra)
+
+- Open-source *`NoSQL distributed`* DB
+- Serverless
+- `3 copies` across `Multi-AZ`
+- Use Cassandra Query Language (CQL)
+- `Single-digit ms`, `1000s req/sec`
+- Capacity modes (similar to DynamoDB)
+  - Provisioned
+  - On-demand
+- Use cases - IoT info, time-series data, ...
+
+### QLDB (Quantum Ledger Database) (Blockchain?)
+
+- Recording **`financial transactions`** (Ledger)
+- Across `3 AZ`
+- Used to Audit changes - `Immutable`
+- `QLDB` vs `Amazon Managed Blockchain`
+  - QLDB is `not decentralize`
+
+### Timestream
+
+- Time series DB
+- Serverless
+- Much `faster` and `cheaper` than `RDS-like` for time-series
+- `Cache` recent data in memory, store data in a `cost-optimized storage`
+- Built-in time series analytics
+- Use cases - IoT apps, real-time analytics
 
 ## Integration & Messaging Services
 
