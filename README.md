@@ -1233,3 +1233,21 @@
   - Give **temporary** `AWS credentials` to `access` AWS `resources`
   - User sources - Cognito User Pool, 3party
   - Access AWS services directly or through API Gateway
+
+## Data Analytic Services
+
+### Athena
+
+- **Analyze data in `S3` using `serverless` `SQL`**
+- Use standard `SQL` (built on Presto)
+- Support CSV, JSON, ORC, Avro, and Parquet
+- Used with Amazon Quicksight
+- Use cases - BI, analyze logs, CloudTail trails
+- Performance Improvement
+  - Use `columnar data` for cost-savings (less scan)
+  - `Compress` data
+  - `Partition` datasets in S3
+  - Use `larger file` (>128MB)
+- Federated Query
+  - Query from other sources - sql, no-sql, custom, on-premise
+  - Uses `Data Source Connectors` - run on `Lambda`
