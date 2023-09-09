@@ -1251,3 +1251,54 @@
 - Federated Query
   - Query from other sources - sql, no-sql, custom, on-premise
   - Uses `Data Source Connectors` - run on `Lambda`
+
+## Monitoring
+
+### CloudWatch - `Performance Monitoring`
+
+- Metric
+  - `Stream` to (near real-time)
+    - Kinesis Firehose
+    - 3 party - Datadog, Dynatrace, New Reric, ..., etc
+- Logs
+  - Logs `Subscriptions`
+    - Send to Kinesis Data Streams/Firehose, Lambda
+    - Can be filtered
+  - `Unified Agent` - Collect more than logs
+    - CPU
+    - Disk metrics
+    - RAM
+    - Netstat
+    - Processes
+- Alarm
+- EventBridge (CloudWatch Events)
+  - Cron jobs
+  - Event Pattern - `react` to a `service` `doing` something
+  - Sources
+    - EC2
+    - CodeBuild
+    - S3
+  - Destinations
+    - Lambda
+    - SQS
+    - SNS
+    - Kinesis Data Stream
+  - Event Bus - Engine
+    - Default is AWS bus
+    - Can have 3 party for other SaaS or On-premises
+- Insights - Automated Dashboard
+  - Container/Lambda Insight - to create `Dashboard`
+  - Contributor Insight - `Top-n` in logs
+  - Application Insight
+
+### CloudTrail - `API Audit Logs`
+
+- Enable by default
+- `90 days` retension - can export to S3
+- **Not** for `data events`
+- Insights - detect `unusual activity`
+
+### AWS Config - `Record/Evaluate Security Configurations`
+
+- Analyze security configuration (Ex: for sg, IAM access key)
+- Auto Remediations - Ex: Remove IAM access key
